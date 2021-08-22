@@ -1122,6 +1122,20 @@ GROUP BY 1, 2""",
             result_sql = Compiler.to_sql(expr)
             assert result_sql == expected_sql
 
+    def test_filter_after_group_by(self):
+        expected = """SELECT *
+FROM (
+  SELECT `foo_id`, sum(`f`) AS `f`
+  FROM star1
+  GROUP BY 1
+) t0
+WHERE `f` = 6
+        """
+        t1 = self.con.table('star1')
+        expr = t1.group_by('foo_id').aggregate([t1.f.sum().name('f')]).filter(t1.f == 6)
+        result = Compiler.to_sql(expr)
+        assert result == expected
+
     def test_aggregate_having(self):
         e1, e2 = self._case_aggregate_having()
 
